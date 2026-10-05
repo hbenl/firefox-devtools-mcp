@@ -5,7 +5,7 @@
 import { WebDriver } from 'selenium-webdriver';
 import type { BrowsingContext } from 'webdriver-bidi-protocol';
 import { ReadinessState, type BiDiFacade } from './bidi.js';
-import { log, logDebug } from '../utils/logger.js';
+import { log, logDebug, logError } from '../utils/logger.js';
 
 const COMMON_URL_SCHEMES = ['http:', 'https:', 'data:', 'blob:', 'file:'];
 
@@ -155,16 +155,22 @@ export class PageManagement {
 
       for (let i = 0; i < handles.length; i++) {
         const handle = handles[i]!;
+        let title = '(unknown)';
+        let url = '(unknown)';
 
-        // Switch to window to get its URL and title
-        await this.driver.switchTo().window(handle);
-        const url = await this.driver.getCurrentUrl();
-        const title = await this.driver.getTitle();
+        try {
+          // Switch to window to get its URL and title
+          await this.driver.switchTo().window(handle);
+          url = (await this.driver.getCurrentUrl()) || 'about:blank';
+          title = (await this.driver.getTitle()) || 'Untitled';
+        } catch (error) {
+          logError('Failed to fetch tab url or title', error);
+        }
 
         this.cachedTabs.push({
           actor: handle,
-          title: title || 'Untitled',
-          url: url || 'about:blank',
+          title,
+          url,
         });
 
         // Track which tab is selected
