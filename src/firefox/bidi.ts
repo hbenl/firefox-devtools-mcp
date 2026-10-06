@@ -160,7 +160,7 @@ export class BiDiFacade extends EventEmitter<FirefoxEventMap> {
     context: BrowsingContext.BrowsingContext,
     expression: string
   ): Promise<T> {
-    return remoteValueToNative(await this.evaluateRaw(expression, context)) as T;
+    return remoteValueToNative(await this.evaluateRaw(context, expression)) as T;
   }
 
   async evaluateRaw(

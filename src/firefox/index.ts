@@ -144,7 +144,7 @@ export class FirefoxClient {
    * native value; throws on a script exception.
    */
   async evaluate(expression: string): Promise<unknown> {
-    return await this.getBidi().evaluate(expression, this.getContext());
+    return await this.getBidi().evaluate(this.getContext(), expression);
   }
 
   // UID-based input methods
