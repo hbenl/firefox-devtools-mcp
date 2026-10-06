@@ -26,7 +26,7 @@ export class UidResolver {
    */
   async clear(context: BrowsingContext.BrowsingContext): Promise<void> {
     try {
-      await this.bidi.evaluate(CLEAR_SCRIPT, context);
+      await this.bidi.evaluate(context, CLEAR_SCRIPT);
       logDebug('Snapshot UIDs cleared');
     } catch {
       logDebug('Unable to clear snapshot UIDs (page may be navigating)');

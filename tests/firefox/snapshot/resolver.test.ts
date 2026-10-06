@@ -68,7 +68,7 @@ describe('UidResolver', () => {
       await resolver.clear(CONTEXT);
 
       expect(mockBiDi.evaluate).toHaveBeenCalledOnce();
-      expect(mockBiDi.evaluate.mock.calls[0][0]).toContain('__clearUidRegistry');
+      expect(mockBiDi.evaluate.mock.calls[0][1]).toContain('__clearUidRegistry');
     });
 
     it('should not throw when the page cannot be reached', async () => {
