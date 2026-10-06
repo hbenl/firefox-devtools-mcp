@@ -14,6 +14,8 @@ import type { Snapshot, SnapshotJson, InjectedScriptResult } from './types.js';
 import { formatSnapshotTree } from './formatter.js';
 import { UidResolver } from './resolver.js';
 
+export const SNAPSHOT_MANAGER_SANDBOX = 'snapshot-manager';
+
 /**
  * Options for snapshot creation
  */
@@ -218,7 +220,8 @@ export class SnapshotManager {
         return window.__createSnapshot(nextElementId, options);
       }
       `,
-      [nativeToLocalValue(nextElementId), nativeToLocalValue(options || {})]
+      [nativeToLocalValue(nextElementId), nativeToLocalValue(options || {})],
+      SNAPSHOT_MANAGER_SANDBOX
     );
 
     return result;

@@ -5,6 +5,7 @@
  */
 
 import type { BrowsingContext, Script } from 'webdriver-bidi-protocol';
+import { SNAPSHOT_MANAGER_SANDBOX } from './manager.js';
 import { BiDiFacade } from '../bidi.js';
 import { nativeToLocalValue } from '../../utils/local-value.js';
 import { logDebug } from '../../utils/logger.js';
@@ -26,7 +27,7 @@ export class UidResolver {
    */
   async clear(context: BrowsingContext.BrowsingContext): Promise<void> {
     try {
-      await this.bidi.evaluate(context, CLEAR_SCRIPT);
+      await this.bidi.evaluate(context, CLEAR_SCRIPT, SNAPSHOT_MANAGER_SANDBOX);
       logDebug('Snapshot UIDs cleared');
     } catch {
       logDebug('Unable to clear snapshot UIDs (page may be navigating)');
@@ -40,9 +41,12 @@ export class UidResolver {
     context: BrowsingContext.BrowsingContext,
     uid: string
   ): Promise<string> {
-    const selector = await this.bidi.callFunction<string | null>(context, SELECTOR_SCRIPT, [
-      nativeToLocalValue(uid),
-    ]);
+    const selector = await this.bidi.callFunction<string | null>(
+      context,
+      SELECTOR_SCRIPT,
+      [nativeToLocalValue(uid)],
+      SNAPSHOT_MANAGER_SANDBOX
+    );
     if (!selector) {
       throw new Error(notFoundMessage(uid));
     }
@@ -57,9 +61,12 @@ export class UidResolver {
     context: BrowsingContext.BrowsingContext,
     uid: string
   ): Promise<Script.SharedReference> {
-    const element = await this.bidi.callFunctionRaw(context, RESOLVE_SCRIPT, [
-      nativeToLocalValue(uid),
-    ]);
+    const element = await this.bidi.callFunctionRaw(
+      context,
+      RESOLVE_SCRIPT,
+      [nativeToLocalValue(uid)],
+      SNAPSHOT_MANAGER_SANDBOX
+    );
     if (element?.type !== 'node' || !element.sharedId) {
       throw new Error(notFoundMessage(uid));
     }
