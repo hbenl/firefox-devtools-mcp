@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowsingContext, Script } from 'webdriver-bidi-protocol';
+import { SNAPSHOT_MANAGER_SANDBOX } from '@/firefox/snapshot/manager';
 import { UidResolver } from '@/firefox/snapshot/resolver.js';
 import { nativeToLocalValue } from '@/utils/local-value';
 
@@ -33,9 +34,12 @@ describe('UidResolver', () => {
       const element = await resolver.resolveUidToElement(CONTEXT, 'e0');
 
       expect(element).toEqual({ sharedId: 'shared-1' });
-      expect(mockBiDi.callFunctionRaw).toHaveBeenCalledWith(CONTEXT, expect.any(String), [
-        nativeToLocalValue('e0'),
-      ]);
+      expect(mockBiDi.callFunctionRaw).toHaveBeenCalledWith(
+        CONTEXT,
+        expect.any(String),
+        [nativeToLocalValue('e0')],
+        SNAPSHOT_MANAGER_SANDBOX
+      );
     });
 
     it('should throw when the page has no element for the UID', async () => {

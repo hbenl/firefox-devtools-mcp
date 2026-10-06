@@ -158,19 +158,21 @@ export class BiDiFacade extends EventEmitter<FirefoxEventMap> {
 
   async evaluate<T = unknown>(
     context: BrowsingContext.BrowsingContext,
-    expression: string
+    expression: string,
+    sandbox?: string
   ): Promise<T> {
-    return remoteValueToNative(await this.evaluateRaw(context, expression)) as T;
+    return remoteValueToNative(await this.evaluateRaw(context, expression, sandbox)) as T;
   }
 
   async evaluateRaw(
     context: BrowsingContext.BrowsingContext,
-    expression: string
+    expression: string,
+    sandbox?: string
   ): Promise<Script.RemoteValue> {
     const result = await this.sendCommand('script.evaluate', {
       expression,
       awaitPromise: true,
-      target: { context },
+      target: { context, sandbox },
     });
     if (result.type === 'success') {
       return result.result;
@@ -183,21 +185,25 @@ export class BiDiFacade extends EventEmitter<FirefoxEventMap> {
   async callFunction<T = unknown>(
     context: BrowsingContext.BrowsingContext,
     functionDeclaration: string,
-    args: Script.LocalValue[]
+    args: Script.LocalValue[],
+    sandbox?: string
   ): Promise<T> {
-    return remoteValueToNative(await this.callFunctionRaw(context, functionDeclaration, args)) as T;
+    return remoteValueToNative(
+      await this.callFunctionRaw(context, functionDeclaration, args, sandbox)
+    ) as T;
   }
 
   async callFunctionRaw(
     context: BrowsingContext.BrowsingContext,
     functionDeclaration: string,
-    args: Script.LocalValue[]
+    args: Script.LocalValue[],
+    sandbox?: string
   ): Promise<Script.RemoteValue> {
     const result = await this.sendCommand('script.callFunction', {
       functionDeclaration,
       arguments: args,
       awaitPromise: true,
-      target: { context },
+      target: { context, sandbox },
     });
     if (result.type === 'success') {
       return result.result;
