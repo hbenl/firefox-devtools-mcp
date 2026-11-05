@@ -268,6 +268,13 @@ export class FirefoxClient {
     );
   }
 
+  getCurrentDialog() {
+    if (!this.dialogEvents) {
+      throw new Error('Dialog events not available');
+    }
+    return this.dialogEvents.getDialog(this.getContext());
+  }
+
   async acceptDialog(promptText?: string): Promise<void> {
     if (!this.pages) {
       throw new Error('Not connected');
