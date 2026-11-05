@@ -89,7 +89,8 @@ export const handleAcceptDialog = defineToolHandler<typeof acceptDialogTool>(
 
     await firefox.acceptDialog(promptText);
     return successResponse(promptText ? `Accepted: "${promptText}"` : 'Accepted');
-  }
+  },
+  false
 );
 
 export const handleDismissDialog = defineToolHandler<typeof dismissDialogTool>(
@@ -99,7 +100,8 @@ export const handleDismissDialog = defineToolHandler<typeof dismissDialogTool>(
 
     await firefox.dismissDialog();
     return successResponse('Dismissed');
-  }
+  },
+  false
 );
 
 // Handlers - History
@@ -143,7 +145,8 @@ export const handleSetViewportSize = defineToolHandler<typeof setViewportSizeToo
     await firefox.setViewportSize(width, height);
 
     return successResponse(`${width}x${height}`);
-  }
+  },
+  false
 );
 
 export const module = defineModule({

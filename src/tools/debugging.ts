@@ -124,7 +124,8 @@ export const handleEnableDebugger = defineToolHandler<typeof enableDebuggerTool>
     requireDebuggingSupport(firefox);
     await firefox.sendBiDiCommand('moz:debugging.setDebuggerEnabled', { enabled: true });
     return successResponse('Debugger enabled');
-  }
+  },
+  false
 );
 
 export const handleListScripts = defineToolHandler<typeof listScriptsTool>(
@@ -141,7 +142,8 @@ export const handleListScripts = defineToolHandler<typeof listScriptsTool>(
       return successResponse('No scripts found');
     }
     return successResponse(scripts.join('\n'));
-  }
+  },
+  false
 );
 
 export const handleGetScriptSource = defineToolHandler<typeof getScriptSourceTool>(
@@ -156,7 +158,8 @@ export const handleGetScriptSource = defineToolHandler<typeof getScriptSourceToo
       scriptUrl,
     });
     return successResponse(result.source);
-  }
+  },
+  false
 );
 
 export const handleSetLogpoint = defineToolHandler<typeof setLogpointTool>(
@@ -167,7 +170,8 @@ export const handleSetLogpoint = defineToolHandler<typeof setLogpointTool>(
     requireDebuggingSupport(firefox);
     const logpointId = await firefox.setLogpoint(url, line, expression);
     return successResponse(`Logpoint set (id: ${logpointId})`);
-  }
+  },
+  false
 );
 
 export const handleRemoveLogpoint = defineToolHandler<typeof removeLogpointTool>(
@@ -178,7 +182,8 @@ export const handleRemoveLogpoint = defineToolHandler<typeof removeLogpointTool>
     requireDebuggingSupport(firefox);
     await firefox.removeLogpoint(logpoint);
     return successResponse('Logpoint removed');
-  }
+  },
+  false
 );
 
 export const handleGetLogpointResults = defineToolHandler<typeof getLogpointResultsTool>(
@@ -201,7 +206,8 @@ export const handleGetLogpointResults = defineToolHandler<typeof getLogpointResu
       return `[${i + 1}] ${JSON.stringify(remoteValueToNative(r.value!))}`;
     });
     return successResponse(lines.join('\n'));
-  }
+  },
+  false
 );
 
 export const module = defineModule({

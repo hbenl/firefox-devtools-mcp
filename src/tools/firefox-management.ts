@@ -92,7 +92,7 @@ export const handleGetFirefoxLogs = defineToolHandler<typeof getFirefoxLogsTool>
     .join('\n');
 
   return successResponse(result);
-});
+}, false);
 
 // ============================================================================
 // Tool: get_firefox_info
@@ -176,7 +176,7 @@ export const handleGetFirefoxInfo = defineToolHandler<typeof getFirefoxInfoTool>
   }
 
   return successResponse(info.join('\n'));
-});
+}, false);
 
 // ============================================================================
 // Tool: close_firefox_session
@@ -215,7 +215,8 @@ export const handleCloseFirefoxSession = defineToolHandler<typeof closeFirefoxSe
         ? 'Disconnected from Firefox. The browser is still running.'
         : 'Closed the Firefox instance started by this server, a new session will start if you use browser tools again.'
     );
-  }
+  },
+  false
 );
 
 export const module = defineModule({

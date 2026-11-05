@@ -103,7 +103,8 @@ export const handleScreencastStart = defineToolHandler<typeof screencastStartToo
     return successResponse(
       `Screencast started (id: ${result.screencast}). Recording to: ${result.path}`
     );
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -163,7 +164,8 @@ export const handleScreencastStop = defineToolHandler<typeof screencastStopTool>
     }
 
     return successResponse(`Screencast saved to: ${result.path}`);
-  }
+  },
+  false
 );
 
 export const module = defineModule({

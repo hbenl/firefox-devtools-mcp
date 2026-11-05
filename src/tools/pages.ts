@@ -208,7 +208,8 @@ export const handleListPages = defineToolHandler<typeof listPagesTool>(
     const selectedIdx = firefox.getSelectedTabIdx();
 
     return successResponse(formatPageList(tabs, selectedIdx));
-  }
+  },
+  false
 );
 
 export const handleNewPage = defineToolHandler<typeof newPageTool>(
@@ -306,7 +307,8 @@ export const handleSelectPage = defineToolHandler<typeof selectPageTool>(
     await firefox.selectTab(selectedIdx);
 
     return successResponse(`selected [${selectedIdx}]`);
-  }
+  },
+  false
 );
 
 export const handleClosePage = defineToolHandler<typeof closePageTool>(
@@ -381,7 +383,8 @@ export const handleGetPageText = defineToolHandler<typeof getPageTextTool>(
     )) as string | null | undefined;
 
     return respondWithContent(text ?? '', args, 'page-text', 'txt');
-  }
+  },
+  false
 );
 
 export const module = defineModule({

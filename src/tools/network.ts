@@ -457,7 +457,8 @@ export const handleListNetworkRequests = defineToolHandler<typeof listNetworkReq
           moreFooter
       );
     }
-  }
+  },
+  false
 );
 
 export const handleGetNetworkRequest = defineToolHandler<typeof getNetworkRequestTool>(
@@ -576,7 +577,8 @@ export const handleGetNetworkRequest = defineToolHandler<typeof getNetworkReques
     }
 
     return successResponse(JSON.stringify(details, null, 2));
-  }
+  },
+  false
 );
 
 export const handleSetNetworkCache = defineToolHandler<typeof setNetworkCacheTool>(
@@ -605,7 +607,8 @@ export const handleSetNetworkCache = defineToolHandler<typeof setNetworkCacheToo
       `cache ${behavior} (${isGlobal ? 'all tabs' : 'selected tab'})` +
         (behavior === 'bypass' ? " — set behavior='default' to restore caching" : '')
     );
-  }
+  },
+  false
 );
 
 export const module = defineModule({

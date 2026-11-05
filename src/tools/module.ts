@@ -6,9 +6,10 @@
  * registry collects these module objects; it does not repeat the tool list.
  */
 
+import type { BrowsingContext } from 'webdriver-bidi-protocol';
 import type { McpToolResponse } from '../types/common.js';
 import type { ToolArgsOf } from '../types/tool-args.js';
-import { errorResponse } from '../utils/response-helpers.js';
+import { errorResponse, successResponse } from '../utils/response-helpers.js';
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'number' | 'object' | 'string';
 
@@ -90,19 +91,34 @@ type RequireConst<D extends ToolDefinition> = string extends D['name']
  * of the handler from its input schema.
  */
 export function defineToolHandler<D extends ToolDefinition & RequireConst<D>>(
-  handler: (args: ToolArgsOf<D>) => Promise<McpToolResponse>
+  handler: (args: ToolArgsOf<D>) => Promise<McpToolResponse>,
+  blockedByDialog?: boolean
 ): TypedToolHandler<D>;
 export function defineToolHandler(
-  handler: (args: unknown) => Promise<McpToolResponse>
+  handler: (args: unknown) => Promise<McpToolResponse>,
+  blockedByDialog = true
 ): ToolHandler {
   return async (input: unknown): Promise<McpToolResponse> => {
     const args: unknown = input ?? {};
     try {
+      if (blockedByDialog) {
+        const { getFirefox } = await import('../index.js');
+        const firefox = await getFirefox();
+        return await firefox.raceAgainstDialogOpened(() => handler(input), dialogOpenedResponse);
+      }
       return await handler(args);
     } catch (error) {
       return errorResponse(error instanceof Error ? error : String(error));
     }
   };
+}
+
+function dialogOpenedResponse(dialog: BrowsingContext.UserPromptOpenedParameters) {
+  const defaultValue =
+    dialog.defaultValue !== undefined ? ` with default value "${dialog.defaultValue}"` : '';
+  return successResponse(
+    `Dialog opened while tool was running: ${dialog.type} "${dialog.message}"${defaultValue}. Use accept_dialog or dismiss_dialog.`
+  );
 }
 
 export function defineModule<const T extends ToolPairs>(

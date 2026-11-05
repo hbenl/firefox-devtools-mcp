@@ -181,6 +181,7 @@ describe('Pages Tools', () => {
           refreshTabs: vi.fn().mockResolvedValue(undefined),
           getTabs: vi.fn().mockReturnValue([{ url: 'about:blank', title: 'blank' }]),
           getSelectedTabIdx: vi.fn().mockReturnValue(0),
+          raceAgainstDialogOpened: vi.fn().mockImplementation((fn: () => any) => fn()),
         }),
       }));
     });

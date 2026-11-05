@@ -25,12 +25,13 @@ describe('Print Tool', () => {
     const FAKE_BASE64 = Buffer.from('%PDF-fake').toString('base64');
     const tempDir = join(tmpdir(), `print-test-${process.pid}`);
     const printPage = vi.fn().mockResolvedValue(FAKE_BASE64);
+    const raceAgainstDialogOpened = vi.fn().mockImplementation((fn: () => any) => fn());
 
     beforeEach(() => {
       printPage.mockClear();
       vi.doMock('../../../src/index.js', () => ({
         args: { unrestrictedSavePaths: true },
-        getFirefox: vi.fn().mockResolvedValue({ printPage }),
+        getFirefox: vi.fn().mockResolvedValue({ printPage, raceAgainstDialogOpened }),
       }));
     });
 
