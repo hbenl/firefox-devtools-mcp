@@ -134,7 +134,8 @@ export const handleListPrivilegedContexts = defineToolHandler<typeof listPrivile
       }
       throw error;
     }
-  }
+  },
+  false
 );
 
 export const handleSelectPrivilegedContext = defineToolHandler<typeof selectPrivilegedContextTool>(
@@ -170,7 +171,8 @@ export const handleSelectPrivilegedContext = defineToolHandler<typeof selectPriv
     return successResponse(
       `Switched to privileged context: ${contextId} (Marionette context set to privileged)`
     );
-  }
+  },
+  false
 );
 
 export const handleEvaluatePrivilegedScript = defineToolHandler<
@@ -228,7 +230,7 @@ export const handleEvaluatePrivilegedScript = defineToolHandler<
       )
     );
   }
-});
+}, false);
 
 export const module = defineModule({
   name: 'privileged',

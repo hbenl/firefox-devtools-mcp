@@ -110,7 +110,8 @@ export const handleListDownloads = defineToolHandler<typeof listDownloadsTool>(
       return `[${d.status}] ${d.suggestedFilename || d.url}${where}`;
     });
     return successResponse(lines.join('\n'));
-  }
+  },
+  false
 );
 
 export const handleClearDownloads = defineToolHandler<typeof clearDownloadsTool>(
@@ -119,7 +120,8 @@ export const handleClearDownloads = defineToolHandler<typeof clearDownloadsTool>
     const firefox = await getFirefox();
     firefox.clearDownloads();
     return successResponse('Downloads cleared.');
-  }
+  },
+  false
 );
 
 export const handleSetDownloadBehavior = defineToolHandler<typeof setDownloadBehaviorTool>(
@@ -148,7 +150,8 @@ export const handleSetDownloadBehavior = defineToolHandler<typeof setDownloadBeh
 
     await firefox.setDownloadBehavior(behavior);
     return successResponse(`Download behavior set to '${behavior}'.`);
-  }
+  },
+  false
 );
 
 export const module = defineModule({

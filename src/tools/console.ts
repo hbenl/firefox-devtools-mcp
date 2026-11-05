@@ -267,7 +267,8 @@ export const handleListConsoleMessages = defineToolHandler<typeof listConsoleMes
     }
 
     return successResponse(output);
-  }
+  },
+  false
 );
 
 export const handleClearConsoleMessages = defineToolHandler<typeof clearConsoleMessagesTool>(
@@ -279,7 +280,8 @@ export const handleClearConsoleMessages = defineToolHandler<typeof clearConsoleM
     firefox.clearConsoleMessages();
 
     return successResponse(`cleared ${count} messages`);
-  }
+  },
+  false
 );
 
 export const module = defineModule({

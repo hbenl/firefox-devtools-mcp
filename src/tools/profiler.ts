@@ -51,7 +51,8 @@ export const handleProfilerIsActive = defineToolHandler<typeof profilerIsActiveT
     const result = await firefox.sendBiDiCommand('moz:profiler.isActive', {});
 
     return successResponse(`Profiler is ${result.active ? 'active' : 'inactive'}`);
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -137,7 +138,8 @@ export const handleProfilerStart = defineToolHandler<typeof profilerStartTool>(
     await firefox.sendBiDiCommand('moz:profiler.start', params);
 
     return successResponse('Profiler started');
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -182,7 +184,8 @@ export const handleProfilerStop = defineToolHandler<typeof profilerStopTool>(
       return successResponse(`Profile saved to: ${result.path}`);
     }
     return successResponse('Profiler stopped. No profile was saved.');
-  }
+  },
+  false
 );
 
 export const module = defineModule({

@@ -72,7 +72,8 @@ export const handleSendBidiCommand = defineToolHandler<typeof sendBidiCommandToo
     }
 
     return successResponse('```json\n' + json + '\n```');
-  }
+  },
+  false
 );
 
 export const module = defineModule({

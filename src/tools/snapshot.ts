@@ -207,7 +207,8 @@ export const handleTakeSnapshot = defineToolHandler<typeof takeSnapshotTool>(
           'The page may not be fully loaded or accessible.'
       );
     }
-  }
+  },
+  false
 );
 
 export const handleResolveUidToSelector = defineToolHandler<typeof resolveUidToSelectorTool>(
@@ -227,7 +228,8 @@ export const handleResolveUidToSelector = defineToolHandler<typeof resolveUidToS
     } catch (error) {
       throw handleUidError(error as Error, uid);
     }
-  }
+  },
+  false
 );
 
 export const handleClearSnapshot = defineToolHandler<typeof clearSnapshotTool>(
@@ -238,7 +240,8 @@ export const handleClearSnapshot = defineToolHandler<typeof clearSnapshotTool>(
     await firefox.clearSnapshot();
 
     return successResponse('🧹 Snapshot cleared');
-  }
+  },
+  false
 );
 
 export const module = defineModule({

@@ -99,7 +99,8 @@ export const handleScreenshotPage = defineToolHandler<typeof screenshotPageTool>
     }
 
     return imageResponse(base64Png);
-  }
+  },
+  false
 );
 
 export const handleScreenshotByUid = defineToolHandler<typeof screenshotByUidTool>(
@@ -128,7 +129,8 @@ export const handleScreenshotByUid = defineToolHandler<typeof screenshotByUidToo
     } catch (error) {
       throw handleUidError(error as Error, uid);
     }
-  }
+  },
+  false
 );
 
 export const module = defineModule({

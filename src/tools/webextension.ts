@@ -101,7 +101,8 @@ export const handleInstallExtension = defineToolHandler<typeof installExtensionT
     return successResponse(
       `Extension installed (${installType}):\n  ID: ${extensionId}\n  Type: ${type}${path ? `\n  Path: ${path}` : ''}`
     );
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -141,7 +142,8 @@ export const handleUninstallExtension = defineToolHandler<typeof uninstallExtens
     await firefox.sendBiDiCommand('webExtension.uninstall', { extension: id });
 
     return successResponse(`Extension uninstalled:\n  ID: ${id}`);
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -262,7 +264,8 @@ export const handleListExtensions = defineToolHandler<typeof listExtensionsTool>
       .join(', ');
 
     return successResponse(formatExtensionList(extensions, filterDescription || undefined));
-  }
+  },
+  false
 );
 
 export const module = defineModule({

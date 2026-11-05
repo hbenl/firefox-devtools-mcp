@@ -211,7 +211,7 @@ export const handleRestartFirefox = defineToolHandler<typeof restartFirefoxTool>
       `Firefox configured. Will start on next tool call:\n${config.join('\n')}`
     );
   }
-});
+}, false);
 
 export const module = defineModule({
   name: 'launch',

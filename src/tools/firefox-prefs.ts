@@ -102,7 +102,8 @@ export const handleSetFirefoxPrefs = defineToolHandler<typeof setFirefoxPrefsToo
     }
 
     return successResponse(output.join('\n'));
-  }
+  },
+  false
 );
 
 // ============================================================================
@@ -187,7 +188,8 @@ export const handleGetFirefoxPrefs = defineToolHandler<typeof getFirefoxPrefsToo
     }
 
     return successResponse(output.join('\n'));
-  }
+  },
+  false
 );
 
 export const module = defineModule({
