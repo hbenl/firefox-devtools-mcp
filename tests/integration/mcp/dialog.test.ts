@@ -8,33 +8,6 @@ import { join } from 'node:path';
 import { mcpTest, type McpTestServer, type ToolResult } from '../../helpers/mcp.js';
 import { fixtureUrl, waitFor } from '../../helpers/firefox.js';
 
-async function getResult(mcp: McpTestServer) {
-  return (await mcp.callTool('evaluate_script', { function: '() => window.result' })).text;
-}
-
-async function runScript(mcp: McpTestServer, fn: string) {
-  const result = await mcp.callTool('evaluate_script', { function: fn });
-  expect(result.isError).toBe(false);
-}
-
-async function getUids(mcp: McpTestServer, ...labels: string[]) {
-  const snapshot = await mcp.callTool('take_snapshot');
-  return labels.map((label) => {
-    const uid = new RegExp(`uid=(\\S+) ${label}`).exec(snapshot.text)?.[1];
-    assert(uid, `snapshot contains the uid for ${label}`);
-    return uid;
-  });
-}
-
-async function expectDialogOpened(mcp: McpTestServer, result: ToolResult, dialog = 'alert "foo"') {
-  expect(result.isError).toBe(false);
-  expect(result.text).toContain(`Dialog opened while tool was running: ${dialog}`);
-
-  const accepted = await mcp.callTool('accept_dialog');
-  expect(accepted.isError).toBe(false);
-  expect(accepted.text).toContain('Accepted');
-}
-
 mcpTest.override('mcpServerArgs', [
   '--tools',
   'pages',
@@ -66,30 +39,35 @@ describe('Dialog handlers', () => {
       dismissExpectation: 'null',
     },
   ])('$method dialog', ({ method, acceptExpectation, dismissExpectation }) => {
+    let context: string | undefined;
+
+    mcpTest.beforeAll(async ({ mcp }) => {
+      const tree = await mcp.callTool('send_bidi_command', {
+        method: 'browsingContext.getTree',
+        params: { maxDepth: 0 },
+      });
+      context = /"context": "([^"]+)"/.exec(tree.text)?.[1];
+      assert(context, 'browsingContext.getTree returns a context');
+    });
+
     mcpTest.beforeEach(async ({ mcp }) => {
       await mcp.callTool('evaluate_script', {
         function: `() => { window.result = 'pending'; setTimeout(() => { window.result = ${method}('foo'); }); }`,
       });
       await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const tree = await mcp.callTool('send_bidi_command', {
-        method: 'browsingContext.getTree',
-        params: { maxDepth: 0 },
-      });
-      const context = /"context": "([^"]+)"/.exec(tree.text)?.[1];
-      assert(context, 'browsingContext.getTree returns a context');
-
-      // the evaluate_script tool errors when a dialog is open so we use
-      // the send_bidi_command tool with script.evaluate instead
-      expect(
-        (
-          await mcp.callTool('send_bidi_command', {
-            method: 'script.evaluate',
-            params: { expression: 'window.result', target: { context }, awaitPromise: false },
-          })
-        ).text
-      ).toContain('"pending"');
+      expect(await getResult(mcp)).toContain('"pending"');
     });
+
+    // the evaluate_script tool errors when a dialog is open so we use
+    // the send_bidi_command tool with script.evaluate instead
+    async function getResult(mcp: McpTestServer) {
+      return (
+        await mcp.callTool('send_bidi_command', {
+          method: 'script.evaluate',
+          params: { expression: 'window.result', target: { context }, awaitPromise: false },
+        })
+      ).text;
+    }
 
     mcpTest('should be left open until it is accepted', async ({ mcp }) => {
       const result = await mcp.callTool(
@@ -126,7 +104,32 @@ describe('Dialog handlers', () => {
   });
 
   describe('tools should return when a dialog opens', () => {
-    const alertPage = `data:text/html,<script>alert('foo')</script>`;
+    async function runScript(mcp: McpTestServer, fn: string) {
+      const result = await mcp.callTool('evaluate_script', { function: fn });
+      expect(result.isError).toBe(false);
+    }
+
+    async function getUids(mcp: McpTestServer, ...labels: string[]) {
+      const snapshot = await mcp.callTool('take_snapshot');
+      return labels.map((label) => {
+        const uid = new RegExp(`uid=(\\S+) ${label}`).exec(snapshot.text)?.[1];
+        assert(uid, `snapshot contains the uid for ${label}`);
+        return uid;
+      });
+    }
+
+    async function expectDialogOpened(
+      mcp: McpTestServer,
+      result: ToolResult,
+      dialog = 'alert "foo"'
+    ) {
+      expect(result.isError).toBe(false);
+      expect(result.text).toContain(`Dialog opened while tool was running: ${dialog}`);
+
+      const accepted = await mcp.callTool('accept_dialog');
+      expect(accepted.isError).toBe(false);
+      expect(accepted.text).toContain('Accepted');
+    }
 
     mcpTest('evaluate_script', async ({ mcp }) => {
       const result = await mcp.callTool('evaluate_script', {
@@ -198,7 +201,7 @@ describe('Dialog handlers', () => {
           `() => window.addEventListener('beforeprint', () => alert('foo'), { once: true })`
         );
 
-        await expectDialogOpened(mcp, await mcp.callTool('print_page', { saveTo: mcp.home }));
+        await expectDialogOpened(mcp, await mcp.callTool('print_page'));
       });
 
       mcpTest('navigate_history', async ({ mcp }) => {
@@ -264,11 +267,17 @@ describe('Dialog handlers', () => {
     });
 
     mcpTest('navigate_page', async ({ mcp }) => {
-      await expectDialogOpened(mcp, await mcp.callTool('navigate_page', { url: alertPage }));
+      await expectDialogOpened(
+        mcp,
+        await mcp.callTool('navigate_page', { url: fixtureUrl('alert.html') })
+      );
     });
 
     mcpTest('new_page', async ({ mcp }) => {
-      await expectDialogOpened(mcp, await mcp.callTool('new_page', { url: alertPage }));
+      await expectDialogOpened(
+        mcp,
+        await mcp.callTool('new_page', { url: fixtureUrl('alert.html') })
+      );
       await mcp.callTool('close_page', { pageIdx: 1 });
     });
 
@@ -311,7 +320,7 @@ describe('Dialog handlers', () => {
       ],
       ['press_key', (mcp) => mcp.callTool('press_key', { key: 'a' })],
       ['type_text', (mcp) => mcp.callTool('type_text', { text: 'abc' })],
-      ['print_page', (mcp) => mcp.callTool('print_page', { saveTo: mcp.home })],
+      ['print_page', (mcp) => mcp.callTool('print_page')],
       ['navigate_history', (mcp) => mcp.callTool('navigate_history', { direction: 'back' })],
       ['fill_by_uid', (mcp) => mcp.callTool('fill_by_uid', { uid: 'e1', value: 'bar' })],
       [
@@ -390,27 +399,15 @@ describe('Dialog handlers', () => {
   );
 
   describe('tools that close Firefox should fail when a dialog is open', () => {
-    const alertPage = `data:text/html,<script>alert('bar')</script>`;
-
     mcpTest.beforeEach(async ({ mcp }) => {
       await mcp.callTool('navigate_page', { url: fixtureUrl('simple.html') });
-      const opened = await mcp.callTool('new_page', { url: alertPage });
-      expect(opened.text).toContain('Dialog opened while tool was running: alert "bar"');
+      const opened = await mcp.callTool('new_page', { url: fixtureUrl('alert.html') });
+      expect(opened.text).toContain('Dialog opened while tool was running: alert "foo"');
 
-      const tree = await mcp.callTool('send_bidi_command', {
-        method: 'browsingContext.getTree',
-        params: { maxDepth: 0 },
-      });
-      const context = /"context": "([^"]+)"/.exec(tree.text)?.[1];
-      assert(context, 'browsingContext.getTree returns a context');
-      await mcp.callTool('send_bidi_command', {
-        method: 'script.evaluate',
-        params: {
-          expression: `setTimeout(() => alert('foo'))`,
-          target: { context },
-          awaitPromise: false,
-        },
-      });
+      await mcp.callTool('select_page', { pageIdx: 0 });
+      const evaluated = await mcp.callTool('evaluate_script', { function: '() => alert("bar")' });
+      expect(evaluated.text).toContain('Dialog opened while tool was running: alert "bar"');
+      await mcp.callTool('select_page', { pageIdx: 1 });
     });
 
     mcpTest.afterEach(async ({ mcp }) => {
@@ -426,8 +423,8 @@ describe('Dialog handlers', () => {
     ] as const)('%s', async ([name, action], { mcp }) => {
       const expected =
         `Cannot ${action} while dialogs are open on these pages:\n` +
-        ` [0] Simple Test Page (${fixtureUrl('simple.html')}): alert "foo"\n` +
-        `>[1] Untitled (${alertPage}): alert "bar"`;
+        ` [0] Simple Test Page (${fixtureUrl('simple.html')}): alert "bar"\n` +
+        `>[1] Untitled (${fixtureUrl('alert.html')}): alert "foo"`;
       await waitFor(async () => (await mcp.callTool(name)).text.includes(expected));
 
       const result = await mcp.callTool(name);
