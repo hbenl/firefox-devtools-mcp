@@ -9,6 +9,7 @@ import {
 const mockGetFirefox = vi.hoisted(() => vi.fn());
 
 const raceAgainstDialogOpened = vi.fn().mockImplementation((fn: () => any) => fn());
+const getCurrentDialog = vi.fn().mockReturnValue(undefined);
 
 vi.mock('../../../src/index.js', () => ({
   getFirefox: () => mockGetFirefox(),
@@ -77,7 +78,7 @@ describe('Privileged Context Tool Handlers', () => {
 
   describe('handleEvaluatePrivilegedScript', () => {
     it('should return error when function parameter is missing', async () => {
-      mockGetFirefox.mockResolvedValue({ raceAgainstDialogOpened });
+      mockGetFirefox.mockResolvedValue({ getCurrentDialog, raceAgainstDialogOpened });
 
       // @ts-expect-error invalid arguments
       const result = await handleEvaluatePrivilegedScript({});
@@ -87,7 +88,7 @@ describe('Privileged Context Tool Handlers', () => {
     });
 
     it('should reject plain expressions (not function strings)', async () => {
-      mockGetFirefox.mockResolvedValue({ raceAgainstDialogOpened });
+      mockGetFirefox.mockResolvedValue({ getCurrentDialog, raceAgainstDialogOpened });
 
       // @ts-expect-error invalid arguments
       const result = await handleEvaluatePrivilegedScript({ function: 'document.title' });
@@ -181,6 +182,7 @@ describe('Privileged Context Tool Handlers', () => {
         sendBiDiCommand: vi
           .fn()
           .mockRejectedValue(new Error('UnsupportedOperationError: not available')),
+        getCurrentDialog,
         raceAgainstDialogOpened,
       };
       mockGetFirefox.mockResolvedValue(mockFirefox);

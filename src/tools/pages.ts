@@ -14,6 +14,7 @@ import {
 } from './module.js';
 import type { McpToolResponse } from '../types/common.js';
 import { ToolArgsOf } from '../types/tool-args.js';
+import { formatPageList } from '../utils/page-list.js';
 
 const DEFAULT_MAX_CONTENT_CHARS = 20_000;
 
@@ -175,27 +176,6 @@ export const getPageTextTool = {
     },
   },
 } as const satisfies ToolDefinition;
-
-/**
- * Format page list compactly
- */
-function formatPageList(
-  tabs: Array<{ title?: string; url?: string }>,
-  selectedIdx: number
-): string {
-  if (tabs.length === 0) {
-    return 'No pages';
-  }
-  const lines: string[] = [`${tabs.length} pages (selected: ${selectedIdx})`];
-  for (const tab of tabs) {
-    const idx = tabs.indexOf(tab);
-    const marker = idx === selectedIdx ? '>' : ' ';
-    const title = (tab.title || 'Untitled').substring(0, 40);
-    const url = (tab.url || 'URL unavailable').substring(0, 200);
-    lines.push(`${marker}[${idx}] ${title} (${url})`);
-  }
-  return lines.join('\n');
-}
 
 // Handlers
 export const handleListPages = defineToolHandler<typeof listPagesTool>(

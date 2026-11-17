@@ -7,8 +7,10 @@
  */
 
 import type { BrowsingContext } from 'webdriver-bidi-protocol';
+import type { FirefoxDevTools } from '../firefox/index.js';
 import type { McpToolResponse } from '../types/common.js';
 import type { ToolArgsOf } from '../types/tool-args.js';
+import { formatPageLine } from '../utils/page-list.js';
 import { errorResponse, successResponse } from '../utils/response-helpers.js';
 
 export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'number' | 'object' | 'string';
@@ -104,6 +106,10 @@ export function defineToolHandler(
       if (blockedByDialog) {
         const { getFirefox } = await import('../index.js');
         const firefox = await getFirefox();
+        const dialog = firefox.getCurrentDialog();
+        if (dialog) {
+          return dialogOpenResponse(dialog);
+        }
         return await firefox.raceAgainstDialogOpened(() => handler(input), dialogOpenedResponse);
       }
       return await handler(args);
@@ -113,11 +119,46 @@ export function defineToolHandler(
   };
 }
 
-function dialogOpenedResponse(dialog: BrowsingContext.UserPromptOpenedParameters) {
+function describeDialog(dialog: BrowsingContext.UserPromptOpenedParameters) {
   const defaultValue =
     dialog.defaultValue !== undefined ? ` with default value "${dialog.defaultValue}"` : '';
+  return `${dialog.type} "${dialog.message}"${defaultValue}`;
+}
+
+/** Reject tool call because a dialog was already open */
+export function dialogOpenResponse(dialog: BrowsingContext.UserPromptOpenedParameters) {
+  return errorResponse(
+    `A dialog is blocking this tool from running: ${describeDialog(dialog)}. Use accept_dialog or dismiss_dialog.`
+  );
+}
+
+/** Return early from tool call because a dialog was opened while it was running */
+function dialogOpenedResponse(dialog: BrowsingContext.UserPromptOpenedParameters) {
   return successResponse(
-    `Dialog opened while tool was running: ${dialog.type} "${dialog.message}"${defaultValue}. Use accept_dialog or dismiss_dialog.`
+    `Dialog opened while tool was running: ${describeDialog(dialog)}. Use accept_dialog or dismiss_dialog.`
+  );
+}
+
+/**
+ * Reject a tool call that would close Firefox while any page has a dialog open.
+ * Returns null if no dialog is open.
+ */
+export async function openDialogsResponse(
+  firefox: FirefoxDevTools,
+  action: string
+): Promise<McpToolResponse | null> {
+  const dialogs = await firefox.getPagesWithDialogs();
+  if (dialogs.length === 0) {
+    return null;
+  }
+  const selectedIdx = firefox.getSelectedTabIdx();
+  const lines = dialogs.map(
+    ({ idx, dialog, ...page }) =>
+      `${formatPageLine(page, idx, selectedIdx)}: ${describeDialog(dialog)}`
+  );
+  return errorResponse(
+    `Cannot ${action} while dialogs are open on these pages:\n${lines.join('\n')}\n` +
+      'Use select_page and then accept_dialog or dismiss_dialog on each of them first.'
   );
 }
 

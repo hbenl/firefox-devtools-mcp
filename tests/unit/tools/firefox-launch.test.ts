@@ -114,6 +114,7 @@ describe('Firefox Launch Tools', () => {
     describe('when Firefox IS running', () => {
       const mockFirefoxInstance = {
         getOptions: vi.fn(),
+        getPagesWithDialogs: vi.fn().mockResolvedValue([]),
         ensureConnected: vi.fn(),
         close: vi.fn(),
       };
@@ -210,6 +211,7 @@ describe('Firefox Launch Tools', () => {
     describe('when connected to an existing Firefox', () => {
       const mockFirefoxInstance = {
         getOptions: vi.fn(),
+        getPagesWithDialogs: vi.fn().mockResolvedValue([]),
         ensureConnected: vi.fn(),
         close: vi.fn(),
       };

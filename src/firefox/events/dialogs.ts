@@ -44,6 +44,10 @@ export class DialogEvents {
     return this.dialogs.get(context);
   }
 
+  hasDialogs() {
+    return this.dialogs.size > 0;
+  }
+
   async raceAgainstDialogOpened<T>(
     fn: () => Promise<T>,
     getCurrentContextId: () => BrowsingContext.BrowsingContext | null,

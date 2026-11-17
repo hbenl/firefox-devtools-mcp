@@ -10,7 +10,12 @@
  */
 
 import { errorResponse, successResponse } from '../utils/response-helpers.js';
-import { defineModule, defineToolHandler, type ToolDefinition } from './module.js';
+import {
+  defineModule,
+  defineToolHandler,
+  openDialogsResponse,
+  type ToolDefinition,
+} from './module.js';
 
 // ============================================================================
 // Tool: restart_firefox
@@ -108,6 +113,11 @@ export const handleRestartFirefox = defineToolHandler<typeof restartFirefoxTool>
 
   if (currentFirefox && isConnected) {
     // Firefox is running - restart with new config
+    const dialogsResponse = await openDialogsResponse(currentFirefox, 'restart Firefox');
+    if (dialogsResponse) {
+      return dialogsResponse;
+    }
+
     const currentOptions = currentFirefox.getOptions();
 
     // Merge prefs: combine existing with new, new takes precedence
