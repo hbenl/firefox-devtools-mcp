@@ -19,6 +19,7 @@ function textOf(result: { content: unknown[] }): string {
 }
 
 const raceAgainstDialogOpened = vi.fn().mockImplementation((fn: () => any) => fn());
+const getCurrentDialog = vi.fn().mockReturnValue(undefined);
 
 describe('Input Tools', () => {
   describe('Tool Definitions', () => {
@@ -138,7 +139,9 @@ describe('Input Tools', () => {
       pressKey = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../../../src/index.js', () => ({
         args: {},
-        getFirefox: vi.fn().mockResolvedValue({ pressKey, raceAgainstDialogOpened }),
+        getFirefox: vi
+          .fn()
+          .mockResolvedValue({ pressKey, getCurrentDialog, raceAgainstDialogOpened }),
       }));
     });
 
@@ -216,7 +219,9 @@ describe('Input Tools', () => {
       typeText = vi.fn().mockResolvedValue(undefined);
       vi.doMock('../../../src/index.js', () => ({
         args: {},
-        getFirefox: vi.fn().mockResolvedValue({ typeText, raceAgainstDialogOpened }),
+        getFirefox: vi
+          .fn()
+          .mockResolvedValue({ typeText, getCurrentDialog, raceAgainstDialogOpened }),
       }));
     });
 

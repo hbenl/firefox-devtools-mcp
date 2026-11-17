@@ -26,12 +26,15 @@ describe('Print Tool', () => {
     const tempDir = join(tmpdir(), `print-test-${process.pid}`);
     const printPage = vi.fn().mockResolvedValue(FAKE_BASE64);
     const raceAgainstDialogOpened = vi.fn().mockImplementation((fn: () => any) => fn());
+    const getCurrentDialog = vi.fn().mockReturnValue(undefined);
 
     beforeEach(() => {
       printPage.mockClear();
       vi.doMock('../../../src/index.js', () => ({
         args: { unrestrictedSavePaths: true },
-        getFirefox: vi.fn().mockResolvedValue({ printPage, raceAgainstDialogOpened }),
+        getFirefox: vi
+          .fn()
+          .mockResolvedValue({ printPage, getCurrentDialog, raceAgainstDialogOpened }),
       }));
     });
 

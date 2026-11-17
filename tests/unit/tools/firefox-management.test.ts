@@ -56,6 +56,7 @@ describe('Firefox Management Tools', () => {
     describe('when Firefox is running', () => {
       const mockFirefoxInstance = {
         getOptions: vi.fn(),
+        getPagesWithDialogs: vi.fn().mockResolvedValue([]),
         ensureConnected: vi.fn(),
         close: vi.fn(),
       };
@@ -113,6 +114,7 @@ describe('Firefox Management Tools', () => {
 
     it('should include prefs in output when configured', async () => {
       const mockFirefoxWithPrefs = {
+        getPagesWithDialogs: vi.fn().mockResolvedValue([]),
         getOptions: vi.fn().mockReturnValue({
           firefoxPath: '/path/to/firefox',
           headless: true,
@@ -142,6 +144,7 @@ describe('Firefox Management Tools', () => {
 
     it('should not show preferences section when none configured', async () => {
       const mockFirefoxNoPrefs = {
+        getPagesWithDialogs: vi.fn().mockResolvedValue([]),
         getOptions: vi.fn().mockReturnValue({
           firefoxPath: '/path/to/firefox',
           headless: true,

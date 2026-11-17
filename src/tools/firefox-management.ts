@@ -5,7 +5,12 @@
 
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { successResponse } from '../utils/response-helpers.js';
-import { defineModule, defineToolHandler, type ToolDefinition } from './module.js';
+import {
+  defineModule,
+  defineToolHandler,
+  openDialogsResponse,
+  type ToolDefinition,
+} from './module.js';
 
 // ============================================================================
 // Tool: get_firefox_logs
@@ -204,6 +209,11 @@ export const handleCloseFirefoxSession = defineToolHandler<typeof closeFirefoxSe
     const currentFirefox = getFirefoxIfRunning();
     if (!currentFirefox) {
       return successResponse('No Firefox session is currently active.');
+    }
+
+    const dialogsResponse = await openDialogsResponse(currentFirefox, 'close the Firefox session');
+    if (dialogsResponse) {
+      return dialogsResponse;
     }
 
     // Read options before calling resetFirefox().

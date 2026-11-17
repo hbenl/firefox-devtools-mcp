@@ -275,6 +275,25 @@ export class FirefoxClient {
     return this.dialogEvents.getDialog(this.getContext());
   }
 
+  async getPagesWithDialogs(): Promise<
+    Array<{
+      idx: number;
+      title: string;
+      url: string;
+      dialog: BrowsingContext.UserPromptOpenedParameters;
+    }>
+  > {
+    const dialogEvents = this.dialogEvents;
+    if (!this.pages || !dialogEvents?.hasDialogs()) {
+      return [];
+    }
+    await this.pages.refreshTabs();
+    return this.pages.getTabs().flatMap(({ actor, title, url }, idx) => {
+      const dialog = dialogEvents.getDialog(actor);
+      return dialog ? [{ idx, title, url, dialog }] : [];
+    });
+  }
+
   async acceptDialog(promptText?: string): Promise<void> {
     if (!this.pages) {
       throw new Error('Not connected');
