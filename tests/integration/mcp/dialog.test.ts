@@ -432,4 +432,13 @@ describe('Dialog handlers', () => {
       expect(result.text).toContain(expected);
     });
   });
+
+  mcpTest(
+    'tools that could be blocked by dialogs should run without arguments',
+    async ({ mcp }) => {
+      await mcp.callTool('navigate_page', { url: fixtureUrl('simple.html') });
+      const result = await mcp.callTool('print_page');
+      expect(result.isError).toBe(false);
+    }
+  );
 });
