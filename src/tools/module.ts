@@ -110,7 +110,7 @@ export function defineToolHandler(
         if (dialog) {
           return dialogOpenResponse(dialog);
         }
-        return await firefox.raceAgainstDialogOpened(() => handler(input), dialogOpenedResponse);
+        return await firefox.raceAgainstDialogOpened(() => handler(args), dialogOpenedResponse);
       }
       return await handler(args);
     } catch (error) {

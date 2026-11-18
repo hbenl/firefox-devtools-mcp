@@ -67,7 +67,7 @@ export async function startMcpServer(serverArgs: string[] = []): Promise<McpTest
 
   return {
     home,
-    async callTool(name, args: any = {}) {
+    async callTool(name, args: any) {
       const result = await client.callTool({ name, arguments: args }, undefined, {
         timeout: 60000,
       });
